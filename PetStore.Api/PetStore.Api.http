@@ -1,0 +1,21 @@
+@PetStore.Api_HostAddress = http://localhost:5050
+
+GET {{PetStore.Api_HostAddress}}/api/pets
+Accept: application/json
+
+###
+
+GET {{PetStore.Api_HostAddress}}/api/pets/all
+Accept: application/json
+
+###
+
+POST {{PetStore.Api_HostAddress}}/api/pets/1/adopt
+Content-Length: 0
+
+###
+
+GET {{PetStore.Api_HostAddress}}/api/adoptions
+Accept: application/json
+
+###
