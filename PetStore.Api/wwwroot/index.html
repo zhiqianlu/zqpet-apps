@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐾 ZQ Pet Store – Adopt Your Dream Pet!</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 20px;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      color: #5c3d8f;
+      text-shadow: 2px 2px 0 #fff;
+      letter-spacing: 2px;
+    }
+
+    header p {
+      font-size: 1.3rem;
+      color: #7b5ea7;
+      margin-top: 8px;
+    }
+
+    /* Coins display */
+    #wallet {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    #coins-display {
+      background: #fff;
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #e67e00;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 3px solid #FFD700;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: rgba(255,255,255,0.6);
+      border: 3px solid transparent;
+      border-radius: 30px;
+      padding: 10px 24px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #5c3d8f;
+      font-weight: bold;
+    }
+
+    .tab-btn:hover { background: rgba(255,255,255,0.9); }
+    .tab-btn.active {
+      background: #5c3d8f;
+      color: white;
+      border-color: #5c3d8f;
+    }
+
+    /* Pet grid */
+    .pet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .pet-card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pet-card:hover:not(.adopted) {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+
+    .pet-card.adopted {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .pet-card .adopted-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #27ae60;
+      color: white;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .pet-emoji {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: 10px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .pet-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .pet-species {
+      font-size: 0.95rem;
+      color: #888;
+      margin: 4px 0 8px;
+    }
+
+    .pet-desc {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .pet-price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #e67e00;
+      margin-bottom: 12px;
+    }
+
+    .adopt-btn {
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 10px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      width: 100%;
+    }
+
+    .adopt-btn:hover { transform: scale(1.05); }
+    .adopt-btn:active { transform: scale(0.98); }
+    .adopt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Section headers */
+    .section-title {
+      text-align: center;
+      font-size: 1.6rem;
+      color: #5c3d8f;
+      margin: 20px 0 16px;
+      font-weight: bold;
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #27ae60;
+      color: white;
+      padding: 16px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.4s;
+      z-index: 1000;
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.error { background: #e74c3c; }
+
+    /* Adoptions list */
+    .adoption-item {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin: 10px auto;
+      max-width: 600px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .adoption-item .emoji { font-size: 2.5rem; }
+    .adoption-item .info { text-align: left; }
+    .adoption-item .info strong { font-size: 1.1rem; color: #2c3e50; }
+    .adoption-item .info small { color: #888; }
+
+    .empty-state {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #888;
+      padding: 40px;
+    }
+
+    /* Game mini section */
+    #mini-game {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 24px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    }
+
+    #mini-game h2 { color: #5c3d8f; margin-bottom: 12px; }
+    #mini-game p { color: #555; margin-bottom: 20px; }
+
+    #guess-display {
+      font-size: 5rem;
+      margin: 20px 0;
+      filter: blur(4px);
+      transition: filter 0.4s;
+    }
+    #guess-display.reveal { filter: blur(0); }
+
+    #options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .option-btn {
+      padding: 14px;
+      font-size: 1.1rem;
+      border: 3px solid #a29bfe;
+      background: white;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+      color: #5c3d8f;
+    }
+
+    .option-btn:hover { background: #f0eeff; }
+    .option-btn.correct { background: #27ae60; border-color: #27ae60; color: white; }
+    .option-btn.wrong { background: #e74c3c; border-color: #e74c3c; color: white; }
+
+    #game-score {
+      font-size: 1.2rem;
+      color: #e67e00;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    #next-btn {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #7b5ea7;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🐾 ZQ Pet Store</h1>
+  <p>Find your perfect furry (or scaly!) friend!</p>
+  <div id="wallet">
+    <span id="coins-display">🪙 Coins: 200</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('shop', this)">🏪 Pet Shop</button>
+  <button class="tab-btn" onclick="showTab('my-pets', this)">🏠 My Pets</button>
+  <button class="tab-btn" onclick="showTab('game', this)">🎮 Guess the Pet!</button>
+</div>
+
+<!-- SHOP TAB -->
+<div id="tab-shop" class="tab-content active">
+  <div class="section-title">Available Pets 🐾</div>
+  <div class="pet-grid" id="pet-grid">
+    <p style="text-align:center;color:#888;padding:40px;">Loading pets...</p>
+  </div>
+</div>
+
+<!-- MY PETS TAB -->
+<div id="tab-my-pets" class="tab-content">
+  <div class="section-title">Your Adopted Pets 💕</div>
+  <div id="adoptions-list">
+    <div class="empty-state">You haven't adopted any pets yet! Visit the shop 🏪</div>
+  </div>
+</div>
+
+<!-- GAME TAB -->
+<div id="tab-game" class="tab-content">
+  <div class="section-title">🎮 Guess the Pet!</div>
+  <div id="mini-game">
+    <h2>Can you guess the pet?</h2>
+    <p>Look at the blurry emoji and pick the right answer! Get it right to earn coins! 🪙</p>
+    <div id="game-score">Score: 0 | Streak: 0 🔥</div>
+    <div id="guess-display">?</div>
+    <div id="options-grid"></div>
+    <button id="next-btn" onclick="nextQuestion()">Next Pet ➡️</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<footer>
+  <p>🐾 ZQ Pet Store – Made with ❤️ for children | Powered by .NET &amp; ASP.NET Core</p>
+</footer>
+
+<script>
+  const API = '';  // same origin
+  let coins = 200;
+  let allPets = [];
+  let gameScore = 0;
+  let gameStreak = 0;
+  let currentAnswer = '';
+  let answered = false;
+
+  // ── Tabs ──────────────────────────────────────────────────────────────
+  function showTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+
+    if (name === 'my-pets') loadAdoptions();
+    if (name === 'game') startGame();
+  }
+
+  // ── Coins ─────────────────────────────────────────────────────────────
+  function updateCoins(delta) {
+    coins += delta;
+    document.getElementById('coins-display').textContent = `🪙 Coins: ${coins}`;
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = isError ? 'error show' : 'show';
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  // ── Load pets ─────────────────────────────────────────────────────────
+  async function loadPets() {
+    try {
+      const res = await fetch(`${API}/api/pets/all`);
+      allPets = await res.json();
+      renderPets(allPets);
+    } catch (e) {
+      document.getElementById('pet-grid').innerHTML =
+        '<p style="text-align:center;color:#e74c3c;padding:40px;">Could not connect to server. Is the API running?</p>';
+    }
+  }
+
+  function renderPets(pets) {
+    const grid = document.getElementById('pet-grid');
+    if (!pets.length) {
+      grid.innerHTML = '<p class="empty-state">No pets found! 🐾</p>';
+      return;
+    }
+    grid.innerHTML = pets.map(p => `
+      <div class="pet-card ${p.isAdopted ? 'adopted' : ''}" style="border-color:${p.color}; background: linear-gradient(135deg, #fff, ${p.color}22)">
+        ${p.isAdopted ? '<span class="adopted-badge">✅ Adopted</span>' : ''}
+        <span class="pet-emoji">${p.emoji}</span>
+        <div class="pet-name">${p.name}</div>
+        <div class="pet-species">${p.species}</div>
+        <div class="pet-desc">${p.description}</div>
+        <div class="pet-price">🪙 ${p.price} coins</div>
+        <button class="adopt-btn" onclick="adoptPet(${p.id},'${p.name}',${p.price})"
+          ${p.isAdopted ? 'disabled' : ''}>
+          ${p.isAdopted ? '💕 Already Adopted' : '❤️ Adopt Me!'}
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // ── Adopt ─────────────────────────────────────────────────────────────
+  async function adoptPet(id, name, price) {
+    if (coins < price) {
+      showToast(`You need ${price} coins to adopt ${name}! Play games to earn more! 🎮`, true);
+      return;
+    }
+    try {
+      const res = await fetch(`${API}/api/pets/${id}/adopt`, { method: 'POST' });
+      if (!res.ok) {
+        const msg = await res.text();
+        showToast(msg, true);
+        return;
+      }
+      const data = await res.json();
+      updateCoins(-price);
+      showToast(data.message);
+      await loadPets();
+    } catch (e) {
+      showToast('Could not connect to the server!', true);
+    }
+  }
+
+  // ── Load adoptions ────────────────────────────────────────────────────
+  async function loadAdoptions() {
+    try {
+      const res = await fetch(`${API}/api/adoptions`);
+      const adoptions = await res.json();
+      const el = document.getElementById('adoptions-list');
+
+      if (!adoptions.length) {
+        el.innerHTML = '<div class="empty-state">You haven\'t adopted any pets yet! Visit the shop 🏪</div>';
+        return;
+      }
+
+      // Find matching pet for emoji
+      const petMap = Object.fromEntries(allPets.map(p => [p.id, p]));
+      el.innerHTML = adoptions.map(a => {
+        const pet = petMap[a.petId] || {};
+        return `
+          <div class="adoption-item">
+            <span class="emoji">${pet.emoji || '🐾'}</span>
+            <div class="info">
+              <strong>${a.petName}</strong><br/>
+              <small>Adopted on ${new Date(a.adoptedAt).toLocaleDateString()}</small>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) {
+      document.getElementById('adoptions-list').innerHTML =
+        '<div class="empty-state">Could not load adoptions.</div>';
+    }
+  }
+
+  // ── Mini game ─────────────────────────────────────────────────────────
+  const gamePets = [
+    { emoji: '🐱', name: 'Cat' },
+    { emoji: '🐶', name: 'Dog' },
+    { emoji: '🐦', name: 'Bird' },
+    { emoji: '🐠', name: 'Fish' },
+    { emoji: '🐰', name: 'Bunny' },
+    { emoji: '🐢', name: 'Turtle' },
+    { emoji: '🐹', name: 'Hamster' },
+    { emoji: '🐡', name: 'Goldfish' },
+    { emoji: '🐸', name: 'Frog' },
+    { emoji: '🦜', name: 'Parrot' },
+    { emoji: '🦔', name: 'Hedgehog' },
+    { emoji: '🐇', name: 'Rabbit' },
+  ];
+
+  function startGame() {
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    answered = false;
+    document.getElementById('next-btn').style.display = 'none';
+
+    const correct = gamePets[Math.floor(Math.random() * gamePets.length)];
+    currentAnswer = correct.name;
+
+    document.getElementById('guess-display').textContent = correct.emoji;
+    document.getElementById('guess-display').className = '';
+
+    // Pick 3 wrong answers
+    const others = gamePets.filter(p => p.name !== correct.name)
+      .sort(() => Math.random() - 0.5).slice(0, 3);
+    const options = [...others, correct].sort(() => Math.random() - 0.5);
+
+    document.getElementById('options-grid').innerHTML = options.map(o => `
+      <button class="option-btn" onclick="checkAnswer('${o.name}', this)">${o.name}</button>
+    `).join('');
+  }
+
+  function checkAnswer(chosen, btn) {
+    if (answered) return;
+    answered = true;
+
+    document.getElementById('guess-display').classList.add('reveal');
+
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach(b => {
+      b.disabled = true;
+      if (b.textContent === currentAnswer) b.classList.add('correct');
+    });
+
+    if (chosen === currentAnswer) {
+      btn.classList.add('correct');
+      gameScore += 10;
+      gameStreak++;
+      const bonus = gameStreak >= 3 ? 5 : 0;
+      updateCoins(10 + bonus);
+      showToast(gameStreak >= 3 ? `🔥 ${gameStreak} streak! +${10+bonus} coins!` : '✅ Correct! +10 coins!');
+    } else {
+      btn.classList.add('wrong');
+      gameStreak = 0;
+      showToast('❌ Wrong! Try again!', true);
+    }
+
+    document.getElementById('game-score').textContent = `Score: ${gameScore} | Streak: ${gameStreak} 🔥`;
+    document.getElementById('next-btn').style.display = 'inline-block';
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
+  loadPets();
+</script>
+</body>
+</html>
